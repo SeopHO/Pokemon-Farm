@@ -2,10 +2,9 @@ let canvas = document.getElementById('canvas');
 let ctx = canvas.getContext('2d');
 let clickBox = document.querySelector("button");
 
-const canvasWidth = canvas.width = 1000;
-const canvasHeight = canvas.height = 1000;
+const canvasWidth = canvas.width = 500;
+const canvasHeight = canvas.height = 500;
 
-let sequence_number=0;
 let maxtime=6;
 let counter={};
 let strState = ['STAY','MOVE'];
@@ -18,26 +17,11 @@ let frameX=64;
 let frameY=64;
 sprite_imge.src = './images/133.png';
 
-function isInt(n){
-    return Number(n) === n && n % 1 === 0;
-}
-function isFloat(n){
-    return Number(n) === n && n % 1 !== 0;
-}
-function count(v)
-{
-    return counter[v] = (counter[v] || 0) + 1;
-}
-
-function resetcount(v)
-{
-    counter[v] = 0;
-}
-
 class Main {
     constructor()
     {
         this.objArr=[];
+        this.objArr_copy=[];
     }
     update()
     {
@@ -61,7 +45,9 @@ class Main {
     addNewObj()
     {
         this.objArr.push(new Obj());
+        this.objArr_copy.push(new copyObj());
         console.log(this.objArr);
+        console.log(this.objArr_copy);
     }
 }
 
@@ -74,9 +60,11 @@ class Obj {
         this.x = Math.floor(Math.random()*(canvasWidth-this.width));
         this.y = Math.floor(Math.random()*(canvasHeight-this.height));
         this.goal = null;
+
         this.timer = this.setTimer();
         this.calcTimer = this.timer*60;
-        this.sequence = `obj${sequence_number++}`;
+        this.timerCnt=0;
+
         this.going=false;
 
         this.animateState=null;
@@ -95,7 +83,7 @@ class Obj {
     }
     stayUpdate()
     {
-        resetcount(this.sequence);
+        this.timerCnt=0;
         this.timer = this.setTimer();
         this.calcTimer = this.timer*60;
         this.going=false;
@@ -155,11 +143,13 @@ class Obj {
             if(this.x<object.locateX)
             {
                 this.x++;
+                copyObj.x++;
                 this.animateState=2;
             }
             else if(this.x>object.locateX)
             {
                 this.x--;
+                copyObj.x--;
                 this.animateState=1;
             }
             this.checkAchieve(this.x,object.locateX);
@@ -171,11 +161,13 @@ class Obj {
             if(this.y<object.locateY)
             {
                 this.y++;
+                copyObj.y++;
                 this.animateState=0;
             }
             else if(this.y>object.locateY)
             {
                 this.y--;
+                copyObj.y--;
                 this.animateState=3;
             }
             this.checkAchieve(this.y,object.locateY);
@@ -189,15 +181,23 @@ class Obj {
     {
         if(locate === goalLocate)
         {
-            console.log(this.sequence); //dont change comment.
-
-            if((this.calcTimer/(count(this.sequence)-1)) === 1)
+            this.timerCnt++;
+            if(this.calcTimer/this.timerCnt===1)
             {
-                this.state = 'STAY';
+                this.state='STAY';
             }
         }
     }
 }
+
+class copyObj{
+    constructor()
+    {
+        this.x = Obj.x;
+        this.y = Obj.y;
+    }
+}
+
 const main = new Main();
  
 function animate()
@@ -211,5 +211,3 @@ animate();
 clickBox.addEventListener('click', function () {
     main.addNewObj();
 });
-
-console.log(isInt(1.5))
